@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+# set -x
+
+CMD=$1
+shift
+
+docker build --quiet --tag $CMD - > /dev/null <<EOM
+FROM node
+WORKDIR /app
+RUN git init
+RUN yarn add $CMD
+RUN yarn install
+EOM
+exec docker run -it --rm --entrypoint "./node_modules/.bin/$CMD" --volume `pwd`/.env-$CMD:/app/.env $CMD "$@"
